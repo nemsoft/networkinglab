@@ -1,3 +1,5 @@
 # networkinglab
 A repo where we experiment and learn network code.
-zzk
+zzkjakob
+Bartek tilføjer. abc
+Ny linje fra Bartek.
