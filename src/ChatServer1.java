@@ -1,7 +1,7 @@
 import java.io.*;
 import java.net.*;
 
-public class ChatServer {
+public class ChatServer1 {
     public static void main(String[] args) throws IOException {
         ServerSocket serverSocket = new ServerSocket(5000);
 
@@ -18,4 +18,5 @@ public class ChatServer {
 
 //Test with (in CMD prompt): 
 // curl telnet://localhost:5000
-// ... or curl telnet://<your_ip_address>:5000
+// ... or:
+//  curl telnet://<ip_address>:5000
