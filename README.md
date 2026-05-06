@@ -13,4 +13,4 @@ A repo where we experiment and learn network code.
     git config --global user.email "your@email.com"
 
 ## Git reference
-https://chatgpt.com/share/69f1b876-f670-8396-80a1-8b736f43faf5 
+https://chatgpt.com/share/69f1b876-f670-8396-80a1-8b736f43faf5
