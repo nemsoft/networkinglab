@@ -7,70 +7,91 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class ChatServer3 {
+public class ChatServer3{
     static ArrayList<ClientHandler3> clients;
-    public void message(ClientHandler3 client, String message){
+    public void announce(ClientHandler3 client, String message){
         for(ClientHandler3 c:clients){
-            if(c!=client){
-                try {
+            if(c!=client&&c.name!=null){
+                try{
                     PrintWriter output = new PrintWriter(c.socket.getOutputStream(), true);
-                    try{
-                        output.println(message);
-                    } catch(Exception e){
-                        System.out.println("couldn't write: "+e);
-                    }
-                } catch (IOException e) {
-                    System.out.println("getOutputStream: "+e);
-                }
+                    output.println(message);
+                } catch(IOException e){}
             }
         }
+    }
+    public void message(String receiver, String message){
+        for(ClientHandler3 c:clients){
+            if(c.name.equals(receiver)){
+                try{
+                    PrintWriter output = new PrintWriter(c.socket.getOutputStream(), true);
+                    output.println(message);
+                } catch(IOException e){}
+            }
+        }
+    }
+    public String list(){
+        String list = "";
+        int unnamed = 0;
+        for(ClientHandler3 c:clients){
+            if(c.name==null){
+                unnamed+=1;
+            } else {
+                list = list.concat(c.name+"\r\n");
+            }
+        }
+        if(unnamed>0){
+            list = list.concat("unnamed x"+unnamed);
+        }
+        return list.substring(0, list.length()-1);
+    }
+    public boolean nameTaken(String name){
+        for(ClientHandler3 c:clients){
+            if(c.name==null) break;
+            if(c.name.equals(name)) return true;
+        }
+        return false;
     }
     public void remove(ClientHandler3 client){
         clients.remove(client);
     }
-    public static void main(String[] args) {
-            ChatServer3 server = new ChatServer3();
-            try {
-            ServerSocket serverSocket = new ServerSocket(5000);
-            System.out.println("Chat server started on port "+serverSocket.getLocalPort());
-            clients = new ArrayList<>();
-            Thread commands = new Thread(() -> {
-                Scanner scanner = new Scanner(System.in);
-                while(scanner.hasNext()){
-                    String input = scanner.nextLine();
-                    for(ClientHandler3 c:clients){
-                        if(input.startsWith("list")){
-                            if(c.name==null){
-                                System.out.println(c.addr+" unavngivet");
-                            } else {
-                                System.out.println(c.addr+" - "+c.name);
-                            }
+    public static void main(String[] args) throws IOException{
+        ChatServer3 server = new ChatServer3();
+        ServerSocket serverSocket = new ServerSocket(5000);
+        System.out.println("Chat server started on port "+serverSocket.getLocalPort());
+        clients = new ArrayList<>();
+        Thread commands = new Thread(() -> {
+            Scanner scanner = new Scanner(System.in);
+            while(scanner.hasNext()){
+                String input = scanner.nextLine();
+                for(ClientHandler3 c:clients){
+                    if(input.startsWith("list")){
+                        if(c.name==null){
+                            System.out.println(c.addr+" unnamed");
+                        } else {
+                            System.out.println(c.addr+" - "+c.name);
                         }
-                        if(input.startsWith("kick")){
-                            if(c.name.equals(input.substring(5))||c.addr.equals(input.substring(5))){
-                                try {
-                                    c.socket.close();
-                                    clients.remove(c);
-                                } catch (IOException e) {
-                                }
+                    }
+                    if(input.startsWith("kick")){
+                        if(c.name.equals(input.substring(5))||c.addr.equals(input.substring(5))){
+                            try {
+                                c.socket.close();
                                 clients.remove(c);
+                            } catch (IOException e) {
                             }
+                            clients.remove(c);
                         }
                     }
                 }
-            });
-            commands.start();
-            while (true) {
-                Socket clientSocket = serverSocket.accept();
-                System.out.println(clientSocket.getInetAddress()+" forbandt");
-                ClientHandler3 handler = new ClientHandler3(clientSocket, server);
-                clients.add(handler);
-                Thread thread = new Thread(handler);
-                thread.start();
             }
-        }
-        catch(IOException e){
-            System.out.println(e);
+        });
+        commands.start();
+        while (true) {
+            Socket clientSocket = serverSocket.accept();
+            System.out.println(clientSocket.getInetAddress()+" connected");
+            ClientHandler3 handler = new ClientHandler3(clientSocket, server);
+            clients.add(handler);
+            Thread thread = new Thread(handler);
+            thread.start();
         }
     }
 }
