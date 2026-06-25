@@ -2,7 +2,7 @@ import java.io.*;
 import java.net.*;
 
 public class ClientHandler3 implements Runnable{
-    private ChatServer3 server;
+    final private ChatServer3 server;
     Socket socket;
     String addr;
     String name = null;
@@ -32,16 +32,15 @@ public class ClientHandler3 implements Runnable{
             }
             name = newName;
             output.println("Welcome "+name);
-            System.out.println(name+" joined");
             server.announce(this, name+" joined");
             String message;
             while ((message = input.readLine()) != null){
+                String[] messageComp = message.split("\\s+", 3);
                 if(message.equals("list")){
                     output.println(server.list());
-                } if(message.startsWith("msg")){
-                    // server.message(message.replaceAll("",""), message.replaceAll("", ""));
+                } else if(messageComp[0].equals("msg")){
+                    server.message(name, messageComp[1], messageComp[2]);
                 } else {
-                    System.out.println(name+": " + message);
                     server.announce(this, name+": " + message);
                 }
             }

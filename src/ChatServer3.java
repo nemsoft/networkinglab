@@ -10,24 +10,33 @@ import java.util.Scanner;
 public class ChatServer3{
     static ArrayList<ClientHandler3> clients;
     public void announce(ClientHandler3 client, String message){
+        System.out.println(message);
         for(ClientHandler3 c:clients){
+            if(c.name==null) break;
             if(c!=client&&c.name!=null){
-                try{
+                try {
                     PrintWriter output = new PrintWriter(c.socket.getOutputStream(), true);
                     output.println(message);
-                } catch(IOException e){}
+                } catch (IOException e) {}
             }
         }
     }
-    public void message(String receiver, String message){
+    public boolean message(String sender, String receiver, String message){
         for(ClientHandler3 c:clients){
+            if(c.name==null) break;
             if(c.name.equals(receiver)){
-                try{
+                try {
                     PrintWriter output = new PrintWriter(c.socket.getOutputStream(), true);
-                    output.println(message);
-                } catch(IOException e){}
+                    String messageComp = sender+" -> "+receiver+": "+message;
+                    output.println(messageComp);
+                    System.out.println(messageComp);
+                    return true;
+                } catch (IOException e) {
+                    System.out.println("Kan ikke sende besked til "+c.name);
+                } 
             }
         }
+        return false;
     }
     public String list(){
         String list = "";
@@ -36,13 +45,13 @@ public class ChatServer3{
             if(c.name==null){
                 unnamed+=1;
             } else {
-                list = list.concat(c.name+"\r\n");
+                list = list.concat("- "+c.name+"\r\n");
             }
         }
         if(unnamed>0){
             list = list.concat("unnamed x"+unnamed);
         }
-        return list.substring(0, list.length()-1);
+        return list.substring(0, list.length());
     }
     public boolean nameTaken(String name){
         for(ClientHandler3 c:clients){
